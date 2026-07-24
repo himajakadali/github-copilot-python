@@ -9,6 +9,12 @@
   <h1>Sudoku Game</h1>
   <div id="sudoku-board"></div>
   <div class="controls">
+    <label for="difficulty">Difficulty</label>
+    <select id="difficulty" name="clues">
+      <option value="45">Easy</option>
+      <option value="35" selected>Medium</option>
+      <option value="25">Hard</option>
+    </select>
     <button id="new-game">New Game</button>
     <button id="check-solution">Check Solution</button>
     <span id="message"></span>
