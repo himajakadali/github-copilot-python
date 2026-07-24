@@ -46,3 +46,9 @@ def test_new_game_route_returns_a_puzzle():
     assert all(len(row) == sudoku_logic.SIZE for row in payload['puzzle'])
     assert CURRENT['puzzle'] is not None
     assert CURRENT['solution'] is not None
+
+
+def test_generated_puzzle_has_a_unique_solution():
+    puzzle, _ = sudoku_logic.generate_puzzle(clues=35)
+
+    assert sudoku_logic.has_unique_solution(puzzle) is True

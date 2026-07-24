@@ -48,10 +48,46 @@ def remove_cells(board, clues):
             board[row][col] = EMPTY
             attempts -= 1
 
+
+def find_empty_location(board):
+    for row in range(SIZE):
+        for col in range(SIZE):
+            if board[row][col] == EMPTY:
+                return row, col
+    return None
+
+
+def count_solutions(board, limit=2):
+    board_copy = deep_copy(board)
+    empty_location = find_empty_location(board_copy)
+    if empty_location is None:
+        return 1
+
+    row, col = empty_location
+    solution_count = 0
+    for candidate in range(1, SIZE + 1):
+        if is_safe(board_copy, row, col, candidate):
+            board_copy[row][col] = candidate
+            solution_count += count_solutions(board_copy, limit - solution_count)
+            board_copy[row][col] = EMPTY
+            if solution_count >= limit:
+                return limit
+    return solution_count
+
+
+def has_unique_solution(board):
+    return count_solutions(board, limit=2) == 1
+
+
 def generate_puzzle(clues=35):
-    board = create_empty_board()
-    fill_board(board)
-    solution = deep_copy(board)
-    remove_cells(board, clues)
-    puzzle = deep_copy(board)
+    for _ in range(50):
+        board = create_empty_board()
+        fill_board(board)
+        solution = deep_copy(board)
+        remove_cells(board, clues)
+        puzzle = deep_copy(board)
+        if has_unique_solution(puzzle):
+            return puzzle, solution
+
+    # Fallback if no unique puzzle is found after several attempts.
     return puzzle, solution
