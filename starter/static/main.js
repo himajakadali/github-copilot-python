@@ -25,6 +25,7 @@ function createBoardElement() {
       input.addEventListener('input', (e) => {
         const val = e.target.value.replace(/[^1-9]/g, '');
         e.target.value = val;
+        handleBoardChange();
       });
       rowDiv.appendChild(input);
     }
@@ -192,6 +193,20 @@ function getBoardFromInputs() {
   return board;
 }
 
+function isBoardSolved(board) {
+  if (!board || board.length !== SIZE) {
+    return false;
+  }
+  for (let i = 0; i < SIZE; i++) {
+    for (let j = 0; j < SIZE; j++) {
+      if (board[i][j] === 0 || board[i][j] !== solution[i][j]) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 function highlightIncorrectEntries(incorrectIndices) {
   const boardDiv = document.getElementById('sudoku-board');
   const inputs = boardDiv.getElementsByTagName('input');
@@ -236,8 +251,24 @@ async function checkSolution() {
   }
 }
 
+function handleBoardChange() {
+  if (gameSolved) {
+    return;
+  }
+  const board = getBoardFromInputs();
+  if (!isBoardSolved(board)) {
+    return;
+  }
+  gameSolved = true;
+  stopTimer();
+  saveLeaderboardScore();
+  const msg = document.getElementById('message');
+  msg.style.color = '#388e3c';
+  msg.innerText = `Congratulations! You solved it in ${formatTime(elapsedSeconds)} with ${hintsUsed} hint${hintsUsed === 1 ? '' : 's'}.`;
+}
+
 function applyHint() {
-  if (!solution || solution.length === 0) {
+  if (!solution || solution.length === 0 || gameSolved) {
     return;
   }
   const boardDiv = document.getElementById('sudoku-board');
@@ -262,6 +293,7 @@ function applyHint() {
   inp.className = 'sudoku-cell prefilled';
   puzzle[row][col] = value;
   hintsUsed += 1;
+  handleBoardChange();
 }
 
 // Wire buttons
