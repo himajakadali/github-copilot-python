@@ -42,6 +42,7 @@ def test_new_game_route_returns_a_puzzle():
     assert response.status_code == 200
     payload = response.get_json()
     assert 'puzzle' in payload
+    assert 'solution' in payload
     assert len(payload['puzzle']) == sudoku_logic.SIZE
     assert all(len(row) == sudoku_logic.SIZE for row in payload['puzzle'])
     assert CURRENT['puzzle'] is not None
