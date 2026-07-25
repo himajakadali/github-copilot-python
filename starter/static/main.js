@@ -2,6 +2,10 @@
 const SIZE = 9;
 let puzzle = [];
 let solution = [];
+let timerInterval = null;
+let elapsedSeconds = 0;
+let hintsUsed = 0;
+let gameSolved = false;
 
 function createBoardElement() {
   const boardDiv = document.getElementById('sudoku-board');
@@ -23,6 +27,41 @@ function createBoardElement() {
       rowDiv.appendChild(input);
     }
     boardDiv.appendChild(rowDiv);
+  }
+}
+
+function formatTime(totalSeconds) {
+  const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+  const seconds = String(totalSeconds % 60).padStart(2, '0');
+  return `${minutes}:${seconds}`;
+}
+
+function updateTimer() {
+  elapsedSeconds += 1;
+  const timerEl = document.getElementById('timer');
+  if (timerEl) {
+    timerEl.textContent = `Time: ${formatTime(elapsedSeconds)}`;
+  }
+}
+
+function startTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+  }
+  elapsedSeconds = 0;
+  hintsUsed = 0;
+  gameSolved = false;
+  const timerEl = document.getElementById('timer');
+  if (timerEl) {
+    timerEl.textContent = 'Time: 00:00';
+  }
+  timerInterval = window.setInterval(updateTimer, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
   }
 }
 
@@ -57,6 +96,7 @@ async function newGame() {
   const data = await res.json();
   renderPuzzle(data.puzzle);
   solution = data.solution || [];
+  startTimer();
   document.getElementById('message').innerText = '';
 }
 
@@ -108,8 +148,10 @@ async function checkSolution() {
   const incorrect = new Set(data.incorrect.map(x => x[0]*SIZE + x[1]));
   highlightIncorrectEntries(Array.from(incorrect));
   if (incorrect.size === 0) {
+    gameSolved = true;
+    stopTimer();
     msg.style.color = '#388e3c';
-    msg.innerText = 'Congratulations! You solved it!';
+    msg.innerText = `Congratulations! You solved it in ${formatTime(elapsedSeconds)} with ${hintsUsed} hint${hintsUsed === 1 ? '' : 's'}.`;
   } else {
     msg.style.color = '#d32f2f';
     msg.innerText = 'Some cells are incorrect.';
@@ -141,6 +183,7 @@ function applyHint() {
   inp.disabled = true;
   inp.className = 'sudoku-cell prefilled';
   puzzle[row][col] = value;
+  hintsUsed += 1;
 }
 
 // Wire buttons
