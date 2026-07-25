@@ -29,3 +29,23 @@ and Copilot was prompted again to fix both issues properly.
 
 ## Running Tests
 Run `pytest` from the `starter` directory to run all tests.
+
+## Copilot Evaluation Notes
+
+While building this project, I identified and corrected two flawed Copilot suggestions:
+
+1. **Hint button used `eval()`**: Copilot's first implementation of the Hint feature
+   used JavaScript's `eval()` function, which was blocked by the browser's Content
+   Security Policy and silently broke the feature. I rejected this approach and
+   asked Copilot to rewrite it using safer alternatives (JSON.parse() / direct
+   property access) instead of eval().
+
+2. **Incomplete 3x3 alternating colors**: Copilot's first styling pass only applied
+   alternating background colors to the bottom row of 3x3 blocks, and introduced
+   a layout bug that added an extra empty column, breaking the grid's square shape.
+   I identified this visually, rejected the incomplete implementation, and prompted
+   Copilot again with more specific instructions to fix both the checkerboard
+   pattern across all rows and the layout/overflow bug.
+
+See `Screenshots/copilot_hint_check_lock.png` and `Screenshots/copilot_styling_fix.png`
+for the corresponding Copilot conversations.
