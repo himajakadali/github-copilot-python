@@ -10,6 +10,23 @@ let hintsUsed = 0;
 let gameSolved = false;
 let currentDifficulty = 'Medium';
 
+function getBlockClass(row, col) {
+  return (Math.floor(row / 3) + Math.floor(col / 3)) % 2 === 0 ? 'block-a' : 'block-b';
+}
+
+function setCellClasses(input, {prefilled = false, incorrect = false} = {}) {
+  const row = Number(input.dataset.row);
+  const col = Number(input.dataset.col);
+  const classes = ['sudoku-cell', getBlockClass(row, col)];
+  if (prefilled) {
+    classes.push('prefilled');
+  }
+  if (incorrect) {
+    classes.push('incorrect');
+  }
+  input.className = classes.join(' ');
+}
+
 function createBoardElement() {
   const boardDiv = document.getElementById('sudoku-board');
   boardDiv.innerHTML = '';
@@ -20,9 +37,9 @@ function createBoardElement() {
       const input = document.createElement('input');
       input.type = 'text';
       input.maxLength = 1;
-      input.className = 'sudoku-cell';
       input.dataset.row = i;
       input.dataset.col = j;
+      setCellClasses(input);
       input.addEventListener('input', (e) => {
         const val = e.target.value.replace(/[^1-9]/g, '');
         e.target.value = val;
@@ -188,11 +205,11 @@ function renderPuzzle(puz) {
       if (val !== 0) {
         inp.value = val;
         inp.disabled = true;
-        inp.className = 'sudoku-cell prefilled';
+        setCellClasses(inp, {prefilled: true});
       } else {
         inp.value = '';
         inp.disabled = false;
-        inp.className = 'sudoku-cell';
+        setCellClasses(inp);
       }
     }
   }
@@ -248,10 +265,8 @@ function highlightIncorrectEntries(incorrectIndices) {
     if (inp.disabled) {
       continue;
     }
-    inp.className = 'sudoku-cell';
-    if (incorrectSet.has(idx)) {
-      inp.className = 'sudoku-cell incorrect';
-    }
+    const incorrect = incorrectSet.has(idx);
+    setCellClasses(inp, {incorrect});
   }
 }
 
