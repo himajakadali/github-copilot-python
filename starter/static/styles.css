@@ -83,3 +83,30 @@ button:hover {
     font-size: 16px;
     color: #d32f2f;
 }
+
+.leaderboard {
+    margin: 30px auto 0;
+    width: min(640px, 90%);
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 16px;
+}
+
+.leaderboard table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.leaderboard th,
+.leaderboard td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: left;
+}
+
+.leaderboard th {
+    color: #555;
+    font-size: 14px;
+    text-transform: uppercase;
+}

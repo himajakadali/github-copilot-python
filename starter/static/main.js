@@ -1,11 +1,13 @@
 // Client-side rendering and interaction for the Flask-backed Sudoku
 const SIZE = 9;
+const LEADERBOARD_KEY = 'sudokuLeaderboard';
 let puzzle = [];
 let solution = [];
 let timerInterval = null;
 let elapsedSeconds = 0;
 let hintsUsed = 0;
 let gameSolved = false;
+let currentDifficulty = 'Medium';
 
 function createBoardElement() {
   const boardDiv = document.getElementById('sudoku-board');
@@ -65,6 +67,80 @@ function stopTimer() {
   }
 }
 
+function getSelectedDifficultyLabel() {
+  const difficultySelect = document.getElementById('difficulty');
+  if (!difficultySelect) {
+    return currentDifficulty;
+  }
+  const selectedOption = difficultySelect.options[difficultySelect.selectedIndex];
+  return selectedOption ? selectedOption.text : currentDifficulty;
+}
+
+function renderLeaderboard() {
+  const leaderboardBody = document.getElementById('leaderboard-body');
+  if (!leaderboardBody) {
+    return;
+  }
+  let entries = [];
+  try {
+    entries = JSON.parse(localStorage.getItem(LEADERBOARD_KEY)) || [];
+  } catch (error) {
+    entries = [];
+  }
+
+  if (!entries.length) {
+    leaderboardBody.innerHTML = '<tr><td colspan="5">No scores yet.</td></tr>';
+    return;
+  }
+
+  entries.sort((a, b) => a.timeSeconds - b.timeSeconds || a.hintsUsed - b.hintsUsed || a.name.localeCompare(b.name));
+
+  leaderboardBody.innerHTML = entries.slice(0, 10).map((entry, index) => {
+    const timeText = formatTime(entry.timeSeconds);
+    return `<tr><td>${index + 1}</td><td>${entry.name}</td><td>${timeText}</td><td>${entry.difficulty}</td><td>${entry.hintsUsed}</td></tr>`;
+  }).join('');
+}
+
+function saveLeaderboardScore() {
+  const playerName = window.prompt('Enter your name for the leaderboard:', 'Anonymous');
+  const name = (playerName || 'Anonymous').trim() || 'Anonymous';
+  const scoreEntry = {
+    name,
+    timeSeconds: elapsedSeconds,
+    difficulty: currentDifficulty,
+    hintsUsed
+  };
+
+  let entries = [];
+  try {
+    entries = JSON.parse(localStorage.getItem(LEADERBOARD_KEY)) || [];
+  } catch (error) {
+    entries = [];
+  }
+
+  if (entries.length < 10) {
+    entries.push(scoreEntry);
+  } else {
+    entries.sort((a, b) => a.timeSeconds - b.timeSeconds || a.hintsUsed - b.hintsUsed || a.name.localeCompare(b.name));
+    const worstEntry = entries[entries.length - 1];
+    if (scoreEntry.timeSeconds >= worstEntry.timeSeconds) {
+      renderLeaderboard();
+      return false;
+    }
+    entries.push(scoreEntry);
+  }
+
+  entries.sort((a, b) => a.timeSeconds - b.timeSeconds || a.hintsUsed - b.hintsUsed || a.name.localeCompare(b.name));
+  const trimmedEntries = entries.slice(0, 10);
+  try {
+    localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(trimmedEntries));
+  } catch (error) {
+    // Ignore storage errors.
+  }
+  renderLeaderboard();
+  return true;
+}
+
 function renderPuzzle(puz) {
   puzzle = puz;
   solution = [];
@@ -91,6 +167,7 @@ function renderPuzzle(puz) {
 
 async function newGame() {
   const difficultySelect = document.getElementById('difficulty');
+  currentDifficulty = getSelectedDifficultyLabel();
   const clues = difficultySelect ? difficultySelect.value : 35;
   const res = await fetch(`/new?clues=${encodeURIComponent(clues)}`);
   const data = await res.json();
@@ -150,6 +227,7 @@ async function checkSolution() {
   if (incorrect.size === 0) {
     gameSolved = true;
     stopTimer();
+    saveLeaderboardScore();
     msg.style.color = '#388e3c';
     msg.innerText = `Congratulations! You solved it in ${formatTime(elapsedSeconds)} with ${hintsUsed} hint${hintsUsed === 1 ? '' : 's'}.`;
   } else {
@@ -191,6 +269,10 @@ window.addEventListener('load', () => {
   document.getElementById('new-game').addEventListener('click', newGame);
   document.getElementById('check-solution').addEventListener('click', checkSolution);
   document.getElementById('hint').addEventListener('click', applyHint);
+  document.getElementById('difficulty').addEventListener('change', () => {
+    currentDifficulty = getSelectedDifficultyLabel();
+  });
+  renderLeaderboard();
   // initialize
   newGame();
 });
