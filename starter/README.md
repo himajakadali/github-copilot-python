@@ -12,6 +12,11 @@ A Sudoku game built with Python Flask, refactored and enhanced using GitHub Copi
 - Dark/Light mode toggle
 - Responsive design for mobile and desktop
 
+## Development Notes
+During development, Copilot's first attempt at styling only applied alternating
+colors to some rows and introduced a layout bug. This was caught during testing
+and Copilot was prompted again to fix both issues properly.
+
 ## Running the App
 1. Navigate to the `starter` directory
 2. Create a virtual environment: `python -m venv .venv`
