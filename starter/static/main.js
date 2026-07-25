@@ -11,7 +11,9 @@ let gameSolved = false;
 let currentDifficulty = 'Medium';
 
 function getBlockClass(row, col) {
-  return (Math.floor(row / 3) + Math.floor(col / 3)) % 2 === 0 ? 'block-a' : 'block-b';
+  const blockRow = Math.floor(row / 3);
+  const blockCol = Math.floor(col / 3);
+  return (blockRow + blockCol) % 2 === 0 ? 'block-a' : 'block-b';
 }
 
 function setCellClasses(input, {prefilled = false, incorrect = false} = {}) {
@@ -337,7 +339,7 @@ function applyHint() {
   const inp = inputs[targetIndex];
   inp.value = value;
   inp.disabled = true;
-  inp.className = 'sudoku-cell prefilled';
+  setCellClasses(inp, {prefilled: true});
   puzzle[row][col] = value;
   hintsUsed += 1;
   handleBoardChange();
